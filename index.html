@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tic Tac Toe</title>
+</head>
+
+<style>
+    td{
+        text-align: center;
+    }
+</style>
+
+<body>
+<h1>TIC TAC TOE, 2 player</h1>
+<table width="400" border="1">
+  <tbody>
+    <tr>
+      <td id="1">&nbsp;</td>
+      <td id="2">&nbsp;</td>
+      <td id="3">&nbsp;</td>
+    </tr>
+    <tr>
+      <td id="4">&nbsp;</td>
+      <td id="5">&nbsp;</td>
+      <td id="6">&nbsp;</td>
+    </tr>
+    <tr>
+      <td id="7">&nbsp;</td>
+      <td id="8">&nbsp;</td>
+      <td id="9">&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<h2 id="msg">Click fields to play!</h2>
+<button>Restart</button>
+<div id="x-wins"></div>
+<div id="o-wins"></div>
+<script>
+	
+	/*
+	
+	Stuff to handle ;-):
+	1. Make the fields clickable (player0 uses "X", player1 "0")
+	2. Keep track of all used fields (fieldsPlayed) and of the fields each player chose (fieldsPlayer0, fieldsPlayer1)
+	3. Avoid that úsed fields can be played again and implement feedback like "Field already taken" (alert();)
+	4. Check for winning combinations
+	5. Implement feedback to the players (winning or game is a draw)
+	6. End the game, avoid further playing
+	7. Add a "Play again button"
+	8. Implement "eternal" game statistics (using local storage!)
+	9. Style the game as fancy and responsive as you can ;-)
+	
+	*/
+	
+	// global game variables
+	var player, fields, fieldsPlayed, fieldsPlayer0, fieldsPlayer1, msg;
+
+    let counter = 0
+    fieldsPlayed = []
+    const winningCombinations = [
+        ['1', '2', '3'],
+        ['4', '5', '6'],
+        ['7', '8', '9'],
+        ['1', '4', '7'],
+        ['2', '5', '8'],
+        ['3', '6', '9'],
+        ['1', '5', '9'],
+        ['3', '5', '7']
+    ]
+
+    let playerXfields = []
+    let playerOfields = []
+    let playerXWins = (localStorage.getItem('player-x-wins') === null) ? 0 : localStorage.getItem('player-x-wins')
+    let playerOWins = (localStorage.getItem('player-o-wins') === null) ? 0 : localStorage.getItem('player-o-wins')
+    let gameWon = false
+
+    document.querySelectorAll('td').forEach(td => {
+        td.addEventListener('click', play)
+    })
+	
+	function play(e){
+		// game core mechanics, marking the fields
+		counter++
+        if(counter % 2 === 0 && !fieldsPlayed.includes(e.target.id)){
+            e.target.textContent = 'O'
+            playerOfields.push(e.target.id)
+        }else if(counter % 2 === 1 && !fieldsPlayed.includes(e.target.id)){
+            e.target.textContent = 'X'
+            playerXfields.push(e.target.id)
+        }
+
+        if(fieldsPlayed.includes(e.target.id)){
+            alert('field already taken')
+            counter--
+        }
+
+        if(!fieldsPlayed.includes(e.target.id)){
+            fieldsPlayed.push(e.target.id)
+        }
+
+        setTimeout(() => {
+            if(gameWon === false && counter === 9){
+                alert("it's a draw")
+            }
+        }, 100);
+
+        win()
+	}
+		
+	function win(){
+        for(let i = 0; i < winningCombinations.length; i++){
+            if(winningCombinations[i].every(v => playerXfields.includes(v))){
+                playerXWins++
+                localStorage.setItem('player-x-wins', playerXWins)
+                gameWon = true
+                gameOver()
+                setTimeout(() => {
+                    alert('player X won')
+                    gameStats()
+                }, 100)
+                console.log(gameWon)
+                break
+            }
+
+            if(winningCombinations[i].every(v => playerOfields.includes(v))){
+                playerOWins++
+                localStorage.setItem('player-o-wins', playerOWins)
+                gameWon = true
+                gameOver()
+                setTimeout(() => {
+                    alert('player O won')
+                    gameStats()
+                }, 100)
+                break
+            }
+        } 
+	}
+
+	function gameOver(){
+		// ending the game
+        document.querySelectorAll('td').forEach(td => {
+            td.removeEventListener('click', play)
+        }) 
+	}
+	
+	function playAgain(){
+		// restart the game
+        document.querySelector('button').addEventListener('click', () => {
+            location.reload()
+        })
+	}
+    playAgain()
+	
+	function gameStats(){
+		// game stats using local storage
+        document.querySelector('#x-wins').innerText = `Player X wins: ${playerXWins}`
+        document.querySelector('#o-wins').innerText = `Player O wins: ${playerOWins}`
+	}
+    gameStats()
+</script>
+</body>
+</html>
